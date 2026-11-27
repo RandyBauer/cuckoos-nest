@@ -32,18 +32,20 @@ You need **JDK 21** and **Docker** (the tests start real Postgres and Redis cont
 
 On Windows, use `gradlew.bat` instead of `./gradlew`.
 
-`./gradlew build` also runs the code-quality checks, and fails if either one finds a problem:
-
-- **Spotless** checks formatting (Palantir Java Format). Run `./gradlew spotlessApply` to fix it.
-- **Checkstyle** checks naming and common mistakes. The rules are in
-  [`config/checkstyle/checkstyle.xml`](config/checkstyle/checkstyle.xml).
-
 Check that it is up:
 
 ```bash
 curl http://localhost:8080/actuator/health
 # {"status":"UP"}
 ```
+
+## Code quality
+
+`./gradlew build` also runs the code-quality checks, and fails if either one finds a problem:
+
+- **Spotless** checks formatting (Palantir Java Format). Run `./gradlew spotlessApply` to fix it.
+- **Checkstyle** checks naming and common mistakes. The rules are in
+  [`config/checkstyle/checkstyle.xml`](config/checkstyle/checkstyle.xml).
 
 ## Contributing
 
