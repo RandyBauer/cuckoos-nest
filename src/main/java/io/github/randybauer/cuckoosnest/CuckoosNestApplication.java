@@ -6,8 +6,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 @SpringBootApplication
 public class CuckoosNestApplication {
 
-	public static void main(String[] args) {
-		SpringApplication.run(CuckoosNestApplication.class, args);
-	}
-
+    public static void main(String[] args) {
+        SpringApplication.run(CuckoosNestApplication.class, args);
+    }
 }
