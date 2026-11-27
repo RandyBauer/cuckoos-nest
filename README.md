@@ -1,5 +1,7 @@
 # The Cuckoo's Nest
 
+[![CI](https://github.com/RandyBauer/cuckoos-nest/actions/workflows/ci.yml/badge.svg)](https://github.com/RandyBauer/cuckoos-nest/actions/workflows/ci.yml)
+
 Honeytokens that catch whoever touches them — AI agents included.
 
 A honeytoken is a decoy: a link, a fake API key, or a fake tool that nobody has any reason to
@@ -30,6 +32,12 @@ You need **JDK 21** and **Docker** (the tests start real Postgres and Redis cont
 
 On Windows, use `gradlew.bat` instead of `./gradlew`.
 
+`./gradlew build` also runs the code-quality checks, and fails if either one finds a problem:
+
+- **Spotless** checks formatting (Palantir Java Format). Run `./gradlew spotlessApply` to fix it.
+- **Checkstyle** checks naming and common mistakes. The rules are in
+  [`config/checkstyle/checkstyle.xml`](config/checkstyle/checkstyle.xml).
+
 Check that it is up:
 
 ```bash
@@ -38,6 +46,9 @@ curl http://localhost:8080/actuator/health
 ```
 
 ## Contributing
+
+[CI](.github/workflows/ci.yml) runs `./gradlew build` on every push to `main` and on every pull
+request. `main` is protected: changes arrive only through pull requests, and CI must pass first.
 
 Work happens on a branch named for its issue, for example `1-project-skeleton`. Every change
 reaches `main` through a pull request that is reviewed against the
