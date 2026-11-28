@@ -115,6 +115,14 @@ breaks.
 | Collapse bursts | `SET NX` with a 60-second expiry per decoy and source (`nest:seen:*`) | A script hitting one decoy 500 times in a minute makes one alert, not 500. |
 | Rate limit | `INCR` per IP per minute (`nest:rate:*`), 120 by default | The tripwires must be public, so a flood is answered with `429` before it reaches the database. Every tripwire gets the same `429`, so the limit can't be used to tell traps apart. |
 
+## Architecture
+
+[docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) has Mermaid diagrams of the components, the decoy
+plugin system, a decoy being touched, an AI agent calling a decoy tool, the data model, and the
+deployment. A test fails the build if a class the diagrams name is renamed, or if a new
+controller or service is missing from them. The reasons behind the main design choices are in
+[eight short decision records](docs/adr/README.md).
+
 ## Tech stack
 
 Java 21 · Spring Boot 4.2 · Spring AI MCP server · PostgreSQL · Redis · Gradle
