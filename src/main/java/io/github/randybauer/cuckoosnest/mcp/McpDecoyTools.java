@@ -93,7 +93,8 @@ public class McpDecoyTools {
                 .callHandler((exchange, request) -> touched(name, exchange, request))
                 .build());
         server.notifyToolsListChanged();
-        LOG.info("Decoy MCP tool added: {}", name);
+        // Log the decoy id, never its token. (For this type the token is the tool name.)
+        LOG.info("Decoy MCP tool added for decoy {}", decoy.getId());
     }
 
     private void remove(Decoy decoy) {
@@ -101,7 +102,7 @@ public class McpDecoyTools {
         if (registered.remove(name)) {
             server.removeTool(name);
             server.notifyToolsListChanged();
-            LOG.info("Decoy MCP tool removed: {}", name);
+            LOG.info("Decoy MCP tool removed for decoy {}", decoy.getId());
         }
     }
 

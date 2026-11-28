@@ -68,7 +68,6 @@ public class DecoyService {
         return decoy;
     }
 
-    /** Finds an active decoy of the given type by its secret token. */
     /** All active decoys of one type, oldest first. */
     @Transactional(readOnly = true)
     public List<Decoy> activeOfType(String typeId) {
@@ -80,6 +79,7 @@ public class DecoyService {
         return decoys.findById(id);
     }
 
+    /** Finds an active decoy of the given type by its secret token. */
     @Transactional(readOnly = true)
     public Optional<Decoy> findActive(String typeId, String token) {
         return decoys.findByToken(token).filter(d -> d.getType().equals(typeId)).filter(Decoy::isActive);

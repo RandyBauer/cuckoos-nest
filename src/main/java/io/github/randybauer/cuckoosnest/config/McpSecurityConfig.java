@@ -47,6 +47,11 @@ public class McpSecurityConfig {
                 .authorizeHttpRequests(auth -> auth.anyRequest().hasRole("MCP_CLIENT"))
                 .addFilterBefore(new BearerTokenFilter(token), AnonymousAuthenticationFilter.class)
                 .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                // CSRF protection is off on purpose for this chain only. CSRF works by making a
+                // browser send credentials it attaches automatically (cookies). This endpoint never
+                // reads cookies or sessions: the only credential is a bearer token in a header,
+                // which a browser never adds on its own. CodeQL's finding here is dismissed as a
+                // false positive with this reasoning.
                 .csrf(AbstractHttpConfigurer::disable)
                 .exceptionHandling(e -> e.authenticationEntryPoint((request, response, ex) -> {
                     // Written directly: sendError() would forward to /error, which the login rules redirect.
@@ -71,6 +76,9 @@ public class McpSecurityConfig {
         protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
                 throws ServletException, IOException {
             String header = request.getHeader(HttpHeaders.AUTHORIZATION);
+            // This condition is the authentication check itself, so it necessarily depends on the
+            // request. It compares against the configured secret in constant time and grants
+            // nothing otherwise. CodeQL's "user-controlled bypass" finding is a false positive.
             if (expected.length > 0 && header != null && header.regionMatches(true, 0, "Bearer ", 0, 7)) {
                 byte[] presented = header.substring(7).strip().getBytes(StandardCharsets.UTF_8);
                 if (MessageDigest.isEqual(expected, presented)) {
