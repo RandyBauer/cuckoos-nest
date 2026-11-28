@@ -86,6 +86,19 @@ and Hibernate only validates that the entities match it. Each environment has it
 To change the schema, add a new versioned file (`V2__...sql`). Never edit a migration that has
 already run.
 
+## Logs
+
+Development logs are plain text. In production (profile `prod`), every log event is one JSON
+object in [Elastic Common Schema](https://www.elastic.co/guide/en/ecs/current/index.html) format,
+so a log service can search by field. A decoy touch logs at `WARN` with its facts as fields:
+
+```json
+{"@timestamp":"2026-11-28T01:35:51.613Z","log":{"level":"WARN","logger":"...AlertService"},
+ "message":"Decoy touched: \"Log check decoy\" (URL) via HTTP from 172.21.0.1",
+ "event":"decoy.touched","decoyId":"11111111-...","decoyType":"URL","channel":"HTTP",
+ "sourceIp":"172.21.0.1","service":{"name":"cuckoos-nest"},"ecs":{"version":"8.11"}}
+```
+
 ## Code quality
 
 `./gradlew build` also runs the code-quality checks, and fails if either one finds a problem:

@@ -44,13 +44,20 @@ public class AlertService {
                 truncate(sourceIp, MAX_IP),
                 truncate(userAgent, MAX_USER_AGENT),
                 cleanDetails(details)));
-        LOG.warn(
-                "Decoy touched: decoy={} type={} label=\"{}\" channel={} sourceIp={}",
-                decoy.getId(),
-                decoy.getType(),
-                decoy.getLabel(),
-                channel,
-                alert.getSourceIp());
+        // The key-value pairs become separate JSON fields when structured logging is on (prod),
+        // so alerts can be searched by decoy, type, channel, or source IP.
+        LOG.atWarn()
+                .addKeyValue("event", "decoy.touched")
+                .addKeyValue("decoyId", decoy.getId())
+                .addKeyValue("decoyType", decoy.getType())
+                .addKeyValue("channel", channel)
+                .addKeyValue("sourceIp", alert.getSourceIp())
+                .log(
+                        "Decoy touched: \"{}\" ({}) via {} from {}",
+                        decoy.getLabel(),
+                        decoy.getType(),
+                        channel,
+                        alert.getSourceIp());
         return alert;
     }
 
