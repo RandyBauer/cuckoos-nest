@@ -102,7 +102,8 @@ The whole stack (the app, Postgres, and Redis) starts with one command:
 docker compose up --build
 ```
 
-The app is then at http://localhost:8080. The image is built by a multi-stage
+The app is then at http://localhost:8080. Sign in with the dev-only login **admin /
+nest-dev-password**; the dev MCP token is `dev-mcp-token`. The image is built by a multi-stage
 [`Dockerfile`](Dockerfile): a JDK stage compiles the app, and a small JRE stage runs it as a
 non-root user with a health check.
 

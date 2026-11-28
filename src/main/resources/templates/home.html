@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>The Cuckoo's Nest</title>
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+    <link rel="stylesheet" th:href="@{/css/nest.css}">
+</head>
+<body>
+<header class="bar">
+    <strong>The Cuckoo's Nest</strong>
+    <form th:action="@{/logout}" method="post" class="inline">
+        <span class="muted">Signed in as <span th:text="${username}">admin</span></span>
+        <button type="submit" class="link">Sign out</button>
+    </form>
+</header>
+<main class="card">
+    <h1>Welcome</h1>
+    <p>The dashboard for decoys and alerts is next on the roadmap.</p>
+</main>
+</body>
+</html>
