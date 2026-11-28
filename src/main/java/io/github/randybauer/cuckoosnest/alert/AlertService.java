@@ -7,6 +7,8 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
+import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Limit;
@@ -67,6 +69,14 @@ public class AlertService {
     public List<Alert> recent(Duration window, int limit) {
         int safeLimit = Math.clamp(limit, 1, MAX_LIMIT);
         return alerts.findByTouchedAtAfterOrderByTouchedAtDesc(clock.instant().minus(window), Limit.of(safeLimit));
+    }
+
+    /** How many alerts each decoy has. Decoys with none are absent from the map. */
+    @Transactional(readOnly = true)
+    public Map<UUID, Long> countsByDecoy() {
+        return alerts.countPerDecoy().stream()
+                .collect(Collectors.toMap(
+                        AlertRepository.DecoyAlertCount::getDecoyId, AlertRepository.DecoyAlertCount::getAlerts));
     }
 
     /** One alert with its decoy loaded. */

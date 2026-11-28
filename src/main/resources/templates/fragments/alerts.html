@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+<div th:fragment="alerts" id="alerts-table">
+    <p th:if="${#lists.isEmpty(alerts)}" class="muted" th:text="#{alerts.none}">No touches.</p>
+    <table th:unless="${#lists.isEmpty(alerts)}" class="stack">
+        <caption class="visually-hidden" th:text="#{alerts.caption}">Recent touches</caption>
+        <thead>
+        <tr>
+            <th scope="col" th:text="#{alerts.col.when}">When</th>
+            <th scope="col" th:text="#{alerts.col.decoy}">Decoy</th>
+            <th scope="col" th:text="#{alerts.col.channel}">Channel</th>
+            <th scope="col" th:text="#{alerts.col.source}">Source IP</th>
+            <th scope="col" th:text="#{alerts.col.client}">Client</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="a : ${alerts}">
+            <td th:data-label="#{alerts.col.when}" th:text="${a.when}">2026-12-01 12:00 UTC</td>
+            <td th:data-label="#{alerts.col.decoy}" th:text="${a.decoyLabel}">Fake admin page</td>
+            <td th:data-label="#{alerts.col.channel}" th:text="${a.channel}">HTTP</td>
+            <td th:data-label="#{alerts.col.source}" th:text="${a.sourceIp}">203.0.113.7</td>
+            <td th:data-label="#{alerts.col.client}" class="wrap" th:text="${a.client}">curl/8</td>
+        </tr>
+        </tbody>
+    </table>
+</div>
+</body>
+</html>

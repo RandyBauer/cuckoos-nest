@@ -69,6 +69,39 @@ The third decoy type lives here too. An **MCP_TOOL decoy** is a tempting fake to
 so a call means the agent was misled, for example by a prompt injection. The call records an alert
 naming the agent's client, and returns a dull "permission denied".
 
+## Dashboard
+
+Sign in to plant decoys, copy their bait, retire them, and watch alerts arrive. The alert list
+refreshes every 15 seconds.
+
+| Desktop | Phone (Spanish) |
+|---|---|
+| ![Dashboard on a desktop](docs/screenshots/dashboard-desktop.jpg) | ![Dashboard on a phone, in Spanish](docs/screenshots/dashboard-es-mobile.jpg) |
+
+### Languages
+
+Every word on every page comes from [`messages.properties`](src/main/resources/messages.properties)
+(English) or [`messages_es.properties`](src/main/resources/messages_es.properties) (Spanish).
+Nothing is hard-coded in the templates. Switch with the links in the header (`?lang=es`), and a
+cookie remembers the choice. A test fails if the two files ever have different keys, or if a page
+uses a key that doesn't exist.
+
+### Accessibility and responsive design
+
+The pages follow WCAG: real `<label>`s on every field, table captions and column headers, a skip
+link, announced status messages (`role="status"`, `aria-live`), a visible focus outline, and colors
+with AA contrast. Checked with Google Lighthouse's accessibility audit, which scores
+**100/100** on every page:
+
+| Page | Layout | Score | Report |
+|---|---|---|---|
+| Dashboard | Phone | 100 | [report](docs/accessibility/dashboard-mobile.report.html) |
+| Dashboard | Desktop | 100 | [report](docs/accessibility/dashboard-desktop.report.html) |
+| Dashboard, Spanish | Phone | 100 | [report](docs/accessibility/dashboard-es-mobile.report.html) |
+| Sign in | Phone | 100 | [report](docs/accessibility/login-mobile.report.html) |
+
+On narrow screens the layout drops to one column, and tables turn into labeled cards.
+
 ## Tech stack
 
 Java 21 · Spring Boot 4.2 · Spring AI MCP server · PostgreSQL · Redis · Gradle

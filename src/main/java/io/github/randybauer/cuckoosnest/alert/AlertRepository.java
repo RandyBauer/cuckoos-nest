@@ -7,6 +7,7 @@ import java.util.UUID;
 import org.springframework.data.domain.Limit;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 
 public interface AlertRepository extends JpaRepository<Alert, Long> {
 
@@ -18,4 +19,14 @@ public interface AlertRepository extends JpaRepository<Alert, Long> {
     Optional<Alert> findWithDecoyById(Long id);
 
     long countByDecoyId(UUID decoyId);
+
+    /** Number of alerts per decoy id, in one query. */
+    @Query("select a.decoy.id as decoyId, count(a) as alerts from Alert a group by a.decoy.id")
+    List<DecoyAlertCount> countPerDecoy();
+
+    interface DecoyAlertCount {
+        UUID getDecoyId();
+
+        long getAlerts();
+    }
 }

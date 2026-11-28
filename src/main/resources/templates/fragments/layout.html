@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+
+<!-- Shared <head> contents. -->
+<th:block th:fragment="head(title)">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title th:text="${title} + ' · ' + #{app.name}">The Cuckoo's Nest</title>
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+    <link rel="stylesheet" th:href="@{/css/nest.css}">
+</th:block>
+
+<!-- Language switch: plain links, so it works without JavaScript. -->
+<nav th:fragment="languages" class="languages" th:aria-label="#{lang.label}">
+    <a th:href="@{''(lang='en')}" lang="en" hreflang="en"
+       th:attr="aria-current=${#locale.language == 'en'} ? 'true' : null" th:text="#{lang.en}">English</a>
+    <a th:href="@{''(lang='es')}" lang="es" hreflang="es"
+       th:attr="aria-current=${#locale.language == 'es'} ? 'true' : null" th:text="#{lang.es}">Español</a>
+</nav>
+
+</body>
+</html>
