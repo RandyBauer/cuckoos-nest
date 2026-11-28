@@ -1,0 +1,38 @@
+# Dependabot opens weekly pull requests to keep dependencies current.
+# Related updates are grouped so there are few PRs to review.
+version: 2
+updates:
+  - package-ecosystem: gradle
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+    open-pull-requests-limit: 5
+    groups:
+      spring:
+        patterns: ["org.springframework*", "io.spring*"]
+      testing:
+        patterns: ["org.testcontainers*", "org.junit*", "org.assertj*", "org.mockito*"]
+      build-tools:
+        patterns: ["com.diffplug*", "com.puppycrawl*", "org.jacoco*", "info.solidsoft*", "org.pitest*"]
+
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+    groups:
+      actions:
+        patterns: ["*"]
+
+  - package-ecosystem: docker
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+
+  - package-ecosystem: devcontainers
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
