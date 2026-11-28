@@ -39,6 +39,25 @@ curl http://localhost:8080/actuator/health
 # {"status":"UP"}
 ```
 
+## Run with Docker
+
+The whole stack (the app, Postgres, and Redis) starts with one command:
+
+```bash
+docker compose up --build
+```
+
+The app is then at http://localhost:8080. The image is built by a multi-stage
+[`Dockerfile`](Dockerfile): a JDK stage compiles the app, and a small JRE stage runs it as a
+non-root user with a health check.
+
+## Develop in a Dev Container
+
+Open the folder in VS Code and run **Dev Containers: Reopen in Container**. The
+[Dev Container](.devcontainer/devcontainer.json) gives you Java 21, Gradle, and Docker access for
+Testcontainers, with Postgres and Redis running beside it. Ports 8080, 5432, and 6379 are
+forwarded, and the first build is warmed up by `postCreateCommand`.
+
 ## Code quality
 
 `./gradlew build` also runs the code-quality checks, and fails if either one finds a problem:

@@ -1,0 +1,35 @@
+# Services for the Dev Container. "dev" is where you code; Postgres and Redis run beside it.
+services:
+  dev:
+    image: mcr.microsoft.com/devcontainers/java:21-bookworm
+    volumes:
+      - ..:/workspaces/cuckoos-nest:cached
+    # Keep the container running so VS Code can attach to it.
+    command: sleep infinity
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/nest
+      SPRING_DATASOURCE_USERNAME: nest
+      SPRING_DATASOURCE_PASSWORD: nest-dev-only
+      SPRING_DATA_REDIS_HOST: redis
+      # Testcontainers starts sibling containers on the host's Docker; reach their ports via the host.
+      TESTCONTAINERS_HOST_OVERRIDE: host.docker.internal
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    depends_on:
+      - postgres
+      - redis
+
+  postgres:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_DB: nest
+      POSTGRES_USER: nest
+      POSTGRES_PASSWORD: nest-dev-only
+    volumes:
+      - devcontainer-postgres-data:/var/lib/postgresql/data
+
+  redis:
+    image: redis:8-alpine
+
+volumes:
+  devcontainer-postgres-data:

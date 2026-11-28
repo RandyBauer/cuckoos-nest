@@ -1,0 +1,33 @@
+// Dev Container: open this folder in VS Code and run "Dev Containers: Reopen in Container".
+// You get Java 21, Gradle, and Docker access (for Testcontainers), plus Postgres and Redis.
+{
+  "name": "Cuckoo's Nest",
+  "dockerComposeFile": "docker-compose.yml",
+  "service": "dev",
+  "workspaceFolder": "/workspaces/cuckoos-nest",
+  "shutdownAction": "stopCompose",
+
+  "features": {
+    // Lets Testcontainers in the container start sibling containers on the host's Docker.
+    "ghcr.io/devcontainers/features/docker-outside-of-docker:1": {}
+  },
+
+  // 8080 = the app, 5432 = Postgres, 6379 = Redis
+  "forwardPorts": [8080, 5432, 6379],
+  "portsAttributes": {
+    "8080": { "label": "Cuckoo's Nest", "onAutoForward": "notify" }
+  },
+
+  // Download Gradle and every dependency once, so the first build inside is fast.
+  "postCreateCommand": "./gradlew --no-daemon compileJava compileTestJava",
+
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "vscjava.vscode-java-pack",
+        "vmware.vscode-spring-boot",
+        "vscjava.vscode-gradle"
+      ]
+    }
+  }
+}
