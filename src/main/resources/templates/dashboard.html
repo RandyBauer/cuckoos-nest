@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html th:lang="${#locale.language}" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head(#{decoys.heading})}"></head>
+<body>
+<a class="skip" href="#main" th:text="#{app.skip}">Skip to main content</a>
+
+<header class="bar">
+    <strong th:text="#{app.name}">The Cuckoo's Nest</strong>
+    <div class="bar-right">
+        <div th:replace="~{fragments/layout :: languages}"></div>
+        <form th:action="@{/logout}" method="post" class="inline">
+            <span class="muted" th:text="#{header.signedInAs(${username})}">Signed in as admin</span>
+            <button type="submit" class="link" th:text="#{header.signOut}">Sign out</button>
+        </form>
+    </div>
+</header>
+
+<main id="main" class="grid">
+    <!-- Messages after an action. role="status" makes screen readers announce them. -->
+    <div class="full" role="status">
+        <div th:if="${createdBait}" class="notice">
+            <p><strong th:text="#{create.done}">Decoy created. Plant this bait:</strong></p>
+            <pre class="bait" th:text="${createdBait}">https://nest.example.com/t/abc</pre>
+            <p class="muted" th:text="#{create.copyHint}">Select the text and copy it into place.</p>
+        </div>
+        <p th:if="${retired}" class="notice" th:text="#{decoys.retired}">Decoy retired.</p>
+        <p th:if="${errorKey}" class="notice error" th:text="#{${errorKey}}">A name is required.</p>
+    </div>
+
+    <section class="card" aria-labelledby="create-heading">
+        <h2 id="create-heading" th:text="#{create.heading}">Plant a decoy</h2>
+        <p class="muted" th:text="#{create.intro}">Pick a kind of decoy...</p>
+        <form th:action="@{/decoys}" method="post">
+            <label for="type" th:text="#{create.type}">Kind of decoy</label>
+            <select id="type" name="type">
+                <option th:each="t : ${types}" th:value="${t}" th:text="#{'decoy.type.' + ${t}}">Link (URL)</option>
+            </select>
+
+            <label for="label" th:text="#{create.label}">Name</label>
+            <input id="label" name="label" type="text" maxlength="200" required aria-describedby="label-hint">
+            <p id="label-hint" class="hint" th:text="#{create.label.hint}">For example: ...</p>
+
+            <label for="location" th:text="#{create.location}">Where you will plant it (optional)</label>
+            <input id="location" name="location" type="text" maxlength="500">
+
+            <button type="submit" th:text="#{create.submit}">Create decoy</button>
+        </form>
+    </section>
+
+    <section class="card" aria-labelledby="alerts-heading">
+        <h2 id="alerts-heading" th:text="#{alerts.heading}">Recent alerts</h2>
+        <p class="hint" th:text="#{alerts.autoRefresh}">This list refreshes every 15 seconds.</p>
+        <div id="alerts" aria-live="polite" th:data-fragment="@{/alerts/fragment}">
+            <div th:replace="~{fragments/alerts :: alerts}"></div>
+        </div>
+    </section>
+
+    <section class="card full" aria-labelledby="decoys-heading">
+        <h2 id="decoys-heading" th:text="#{decoys.heading}">Decoys</h2>
+        <p th:if="${#lists.isEmpty(decoys)}" class="muted" th:text="#{decoys.none}">No decoys yet.</p>
+        <table th:unless="${#lists.isEmpty(decoys)}" class="stack">
+            <caption class="visually-hidden" th:text="#{decoys.caption}">All decoys</caption>
+            <thead>
+            <tr>
+                <th scope="col" th:text="#{decoys.col.name}">Name</th>
+                <th scope="col" th:text="#{decoys.col.kind}">Kind</th>
+                <th scope="col" th:text="#{decoys.col.where}">Planted at</th>
+                <th scope="col" th:text="#{decoys.col.created}">Created</th>
+                <th scope="col" th:text="#{decoys.col.status}">Status</th>
+                <th scope="col" th:text="#{decoys.col.alerts}">Alerts</th>
+                <th scope="col" th:text="#{decoys.col.bait}">Bait</th>
+                <th scope="col" th:text="#{decoys.col.actions}">Actions</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="d : ${decoys}" th:classappend="${d.active} ? '' : 'retired'">
+                <td th:data-label="#{decoys.col.name}" th:text="${d.label}">Fake admin page</td>
+                <td th:data-label="#{decoys.col.kind}" th:text="#{'decoy.type.' + ${d.type}}">Link (URL)</td>
+                <td th:data-label="#{decoys.col.where}" class="wrap"
+                    th:text="${d.location} ?: #{decoys.unknownLocation}">docs/ADMIN.md</td>
+                <td th:data-label="#{decoys.col.created}" th:text="${d.created}">2026-12-01 12:00 UTC</td>
+                <td th:data-label="#{decoys.col.status}"
+                    th:text="${d.active} ? #{decoys.status.active} : #{decoys.status.retired}">Active</td>
+                <td th:data-label="#{decoys.col.alerts}" th:text="${d.alerts}">0</td>
+                <td th:data-label="#{decoys.col.bait}">
+                    <details>
+                        <summary th:text="#{decoys.showBait}">Show bait</summary>
+                        <pre class="bait" th:text="${d.bait}">https://nest.example.com/t/abc</pre>
+                    </details>
+                </td>
+                <td th:data-label="#{decoys.col.actions}">
+                    <form th:if="${d.active}" th:action="@{/decoys/{id}/retire(id=${d.id})}" method="post">
+                        <button type="submit" class="secondary" th:aria-label="#{decoys.retire.label(${d.label})}"
+                                th:text="#{decoys.retire}">Retire</button>
+                    </form>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </section>
+</main>
+
+<script th:src="@{/js/alerts-refresh.js}" defer></script>
+</body>
+</html>

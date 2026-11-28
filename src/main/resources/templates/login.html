@@ -1,28 +1,23 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org">
-<head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Sign in · The Cuckoo's Nest</title>
-    <link rel="icon" href="/favicon.svg" type="image/svg+xml">
-    <link rel="stylesheet" th:href="@{/css/nest.css}">
-</head>
+<html th:lang="${#locale.language}" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head(#{login.title})}"></head>
 <body class="center">
 <main class="card narrow">
-    <h1>The Cuckoo's Nest</h1>
-    <p class="muted">Honeytokens that catch whoever touches them.</p>
+    <div th:replace="~{fragments/layout :: languages}"></div>
+    <h1 th:text="#{app.name}">The Cuckoo's Nest</h1>
+    <p class="muted" th:text="#{app.tagline}">Honeytokens that catch whoever touches them.</p>
 
-    <p th:if="${param.error}" class="notice error" role="alert">Wrong username or password.</p>
-    <p th:if="${param.logout}" class="notice" role="status">You are signed out.</p>
+    <p th:if="${param.error}" class="notice error" role="alert" th:text="#{login.error}">Wrong username or password.</p>
+    <p th:if="${param.logout}" class="notice" role="status" th:text="#{login.loggedOut}">You are signed out.</p>
 
     <form th:action="@{/login}" method="post">
-        <label for="username">Username</label>
+        <label for="username" th:text="#{login.username}">Username</label>
         <input id="username" name="username" type="text" autocomplete="username" required autofocus>
 
-        <label for="password">Password</label>
+        <label for="password" th:text="#{login.password}">Password</label>
         <input id="password" name="password" type="password" autocomplete="current-password" required>
 
-        <button type="submit">Sign in</button>
+        <button type="submit" th:text="#{login.submit}">Sign in</button>
     </form>
 </main>
 </body>

@@ -38,3 +38,41 @@ form.inline { display: inline; }
 
 .notice { padding: .6rem .8rem; border-radius: 6px; background: #e8f0ec; }
 .notice.error { background: #fbe9e7; color: var(--danger); }
+
+/* ---- Dashboard ---- */
+.skip { position: absolute; left: -999px; top: 0; padding: .5rem 1rem; background: #fff; color: var(--ink); z-index: 10; }
+.skip:focus { left: .5rem; top: .5rem; }
+.visually-hidden { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+
+.bar-right { display: flex; flex-wrap: wrap; gap: 1rem; align-items: center; }
+.languages { display: flex; gap: .75rem; }
+.languages a { color: inherit; }
+.languages a[aria-current="true"] { font-weight: 700; text-decoration: none; }
+.card .languages { justify-content: flex-end; }
+.card .languages a { color: var(--accent); }
+
+.grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.4fr); gap: 0; max-width: 72rem; margin: 0 auto; }
+.grid .full { grid-column: 1 / -1; }
+.grid > .full[role="status"] { margin: 0 1rem; }
+h2 { margin-top: 0; font-size: 1.25rem; }
+.hint { margin: .25rem 0 0; font-size: .9rem; color: var(--muted); }
+
+table { width: 100%; border-collapse: collapse; font-size: .95rem; }
+th, td { text-align: left; padding: .5rem .4rem; border-bottom: 1px solid var(--line); vertical-align: top; }
+th { font-weight: 700; }
+td.wrap { overflow-wrap: anywhere; }
+tr.retired { color: var(--muted); }
+pre.bait { margin: .4rem 0 0; padding: .5rem; background: #f0ede4; border-radius: 6px;
+           white-space: pre-wrap; overflow-wrap: anywhere; font-size: .85rem; }
+details summary { cursor: pointer; color: var(--accent); }
+button.secondary { margin: 0; padding: .3rem .7rem; background: #fff; color: var(--danger); border: 1px solid var(--danger); }
+
+/* Phones and narrow windows: one column, and tables become stacked cards with labels. */
+@media (max-width: 760px) {
+    .grid { grid-template-columns: 1fr; }
+    .card { margin: .75rem; padding: 1rem; }
+    table.stack thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+    table.stack tr { display: block; border: 1px solid var(--line); border-radius: 8px; margin-bottom: .75rem; padding: .25rem .5rem; }
+    table.stack td { display: grid; grid-template-columns: 7.5rem minmax(0, 1fr); gap: .5rem; border: 0; padding: .35rem 0; }
+    table.stack td::before { content: attr(data-label); font-weight: 700; color: var(--muted); }
+}
