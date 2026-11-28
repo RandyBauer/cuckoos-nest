@@ -38,3 +38,57 @@ jobs:
           name: test-reports
           path: build/reports/
           retention-days: 7
+
+      - name: Upload coverage report
+        if: success() && github.event_name == 'push' && github.ref == 'refs/heads/main'
+        uses: actions/upload-artifact@v7
+        with:
+          name: coverage
+          path: build/reports/jacoco/test/
+          retention-days: 14
+
+  # After a green build on main, turn the JaCoCo CSV into badge images and publish them to the
+  # `badges` branch (main is protected, so badges live elsewhere). The README links to them.
+  coverage-badge:
+    name: coverage badge
+    needs: build
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v8
+        with:
+          name: coverage
+          path: coverage
+
+      - name: Generate badges
+        uses: cicirello/jacoco-badge-generator@v2.12.1
+        with:
+          jacoco-csv-file: coverage/jacocoTestReport.csv
+          badges-directory: badges
+          generate-branches-badge: true
+          generate-workflow-summary: true
+
+      - name: Publish to the badges branch
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          if git clone --depth 1 --branch badges "https://x-access-token:${GH_TOKEN}@github.com/${REPO}.git" pub; then
+            cd pub
+          else
+            git init -b badges pub && cd pub
+            git remote add origin "https://x-access-token:${GH_TOKEN}@github.com/${REPO}.git"
+          fi
+          cp ../badges/*.svg .
+          git add *.svg
+          if git diff --cached --quiet; then
+            echo "Badges unchanged."
+          else
+            git commit -m "Update coverage badges for ${GITHUB_SHA::7}"
+            git push origin HEAD:badges
+          fi

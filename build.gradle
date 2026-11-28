@@ -3,6 +3,7 @@ plugins {
 	id 'org.springframework.boot' version '4.2.0'
 	id 'io.spring.dependency-management' version '1.1.7'
 	id 'checkstyle'
+	id 'jacoco'
 	id 'com.diffplug.spotless' version '8.12.0'
 }
 
@@ -60,6 +61,39 @@ dependencyManagement {
 
 tasks.named('test') {
 	useJUnitPlatform()
+	finalizedBy 'jacocoTestReport'
+}
+
+// Coverage: `./gradlew test` writes build/reports/jacoco/test/html/index.html.
+// CSV feeds the README badge; XML is the format most tools read.
+jacoco {
+	toolVersion = '0.8.16'
+}
+
+tasks.named('jacocoTestReport') {
+	dependsOn 'test'
+	reports {
+		xml.required = true
+		csv.required = true
+		html.required = true
+	}
+}
+
+// Quality gate: `./gradlew check` fails if line coverage drops below 80%.
+tasks.named('jacocoTestCoverageVerification') {
+	dependsOn 'jacocoTestReport'
+	violationRules {
+		rule {
+			limit {
+				counter = 'LINE'
+				minimum = 0.80
+			}
+		}
+	}
+}
+
+tasks.named('check') {
+	dependsOn 'jacocoTestCoverageVerification'
 }
 
 // Formatting: Spotless rewrites code with `./gradlew spotlessApply`; `check` fails if anything is unformatted.
