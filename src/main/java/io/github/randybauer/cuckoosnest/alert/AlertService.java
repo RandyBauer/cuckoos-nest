@@ -28,10 +28,31 @@ public class AlertService {
 
     private final AlertRepository alerts;
     private final Clock clock;
+    private final RepeatFilter repeats;
 
-    public AlertService(AlertRepository alerts, Clock clock) {
+    public AlertService(AlertRepository alerts, Clock clock, RepeatFilter repeats) {
         this.alerts = alerts;
         this.clock = clock;
+        this.repeats = repeats;
+    }
+
+    /**
+     * Records a touch from a tripwire, unless the same source touched the same decoy in the last
+     * minute (see {@link RepeatFilter}). Returns the new alert, or empty for a repeat.
+     */
+    @Transactional
+    public Optional<Alert> recordTouch(
+            Decoy decoy, Alert.Channel channel, String sourceIp, String userAgent, Map<String, ?> details) {
+        String source = sourceIp != null ? sourceIp : userAgent;
+        if (!repeats.isFirst(decoy.getId(), channel, source)) {
+            LOG.info(
+                    "Repeat touch of decoy {} from {} within {}s; not recorded again.",
+                    decoy.getId(),
+                    source,
+                    RepeatFilter.WINDOW.toSeconds());
+            return Optional.empty();
+        }
+        return Optional.of(record(decoy, channel, sourceIp, userAgent, details));
     }
 
     /**

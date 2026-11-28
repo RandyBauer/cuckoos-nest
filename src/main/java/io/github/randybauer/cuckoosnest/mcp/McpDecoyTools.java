@@ -115,7 +115,7 @@ public class McpDecoyTools {
             details.put("tool", name);
             details.put("arguments", String.valueOf(request.arguments()));
             details.put("sessionId", exchange.sessionId());
-            alerts.record(decoy, Alert.Channel.MCP, null, clientName, details);
+            alerts.recordTouch(decoy, Alert.Channel.MCP, null, clientName, details);
         });
         return McpSchema.CallToolResult.builder()
                 .addTextContent(DENIED)

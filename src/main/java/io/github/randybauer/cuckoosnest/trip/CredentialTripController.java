@@ -79,7 +79,7 @@ public class CredentialTripController {
         if (forwarded != null && !forwarded.isBlank()) {
             details.put("forwardedFor", forwarded);
         }
-        alerts.record(
+        alerts.recordTouch(
                 decoy, Alert.Channel.HTTP, request.getRemoteAddr(), request.getHeader(HttpHeaders.USER_AGENT), details);
     }
 }

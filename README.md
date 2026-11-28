@@ -102,6 +102,18 @@ with AA contrast. Checked with Google Lighthouse's accessibility audit, which sc
 
 On narrow screens the layout drops to one column, and tables turn into labeled cards.
 
+## How Redis is used
+
+Redis does three jobs, each on the public alarm path. If Redis goes down, all three **fail open**:
+the Nest keeps catching touches, because an alarm system must not lose alarms when its cache
+breaks.
+
+| Job | How | Why |
+|---|---|---|
+| "Not a decoy" cache | A miss is remembered for 10 minutes (`nest:miss:*`) | Scanners throw thousands of random tokens at `/t/` and `/api/v1/`. Repeats are answered from Redis instead of Postgres. Real decoys always come from Postgres, so they're never stale. |
+| Collapse bursts | `SET NX` with a 60-second expiry per decoy and source (`nest:seen:*`) | A script hitting one decoy 500 times in a minute makes one alert, not 500. |
+| Rate limit | `INCR` per IP per minute (`nest:rate:*`), 120 by default | The tripwires must be public, so a flood is answered with `429` before it reaches the database. Every tripwire gets the same `429`, so the limit can't be used to tell traps apart. |
+
 ## Tech stack
 
 Java 21 · Spring Boot 4.2 · Spring AI MCP server · PostgreSQL · Redis · Gradle
