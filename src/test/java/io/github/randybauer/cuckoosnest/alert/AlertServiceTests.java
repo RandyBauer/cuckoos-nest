@@ -65,6 +65,19 @@ class AlertServiceTests {
     }
 
     @Test
+    void forLogStopsForgedLogLines() {
+        String attack = "curl/8\r\n2026-12-01 ERROR Admin password changed\u001b[31m";
+
+        assertThat(AlertService.forLog(attack))
+                .doesNotContain("\r")
+                .doesNotContain("\n")
+                .doesNotContain("\u001b")
+                .isEqualTo("curl/8__2026-12-01 ERROR Admin password changed_[31m");
+        assertThat(AlertService.forLog(null)).isNull();
+        assertThat(AlertService.forLog("x".repeat(5_000))).hasSize(AlertService.MAX_USER_AGENT);
+    }
+
+    @Test
     void truncateLeavesShortValuesAlone() {
         assertThat(AlertService.truncate(null, 3)).isNull();
         assertThat(AlertService.truncate("abc", 3)).isEqualTo("abc");

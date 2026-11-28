@@ -48,7 +48,7 @@ public class AlertService {
             LOG.info(
                     "Repeat touch of decoy {} from {} within {}s; not recorded again.",
                     decoy.getId(),
-                    source,
+                    forLog(source),
                     RepeatFilter.WINDOW.toSeconds());
             return Optional.empty();
         }
@@ -75,13 +75,13 @@ public class AlertService {
                 .addKeyValue("decoyId", decoy.getId())
                 .addKeyValue("decoyType", decoy.getType())
                 .addKeyValue("channel", channel)
-                .addKeyValue("sourceIp", alert.getSourceIp())
+                .addKeyValue("sourceIp", forLog(alert.getSourceIp()))
                 .log(
                         "Decoy touched: \"{}\" ({}) via {} from {}",
-                        decoy.getLabel(),
+                        forLog(decoy.getLabel()),
                         decoy.getType(),
                         channel,
-                        alert.getSourceIp());
+                        forLog(alert.getSourceIp()));
         return alert;
     }
 
@@ -104,6 +104,24 @@ public class AlertService {
     @Transactional(readOnly = true)
     public Optional<Alert> find(long id) {
         return alerts.findWithDecoyById(id);
+    }
+
+    /**
+     * Makes a stranger-supplied value safe to put in a log line. A user agent such as
+     * {@code "curl\r\n2026-12-01 ERROR fake entry"} would otherwise forge a second line in plain-text
+     * logs (log injection). Line breaks and other control characters become '_'.
+     */
+    static String forLog(String value) {
+        if (value == null) {
+            return null;
+        }
+        String noBreaks = value.replace('\r', '_').replace('\n', '_');
+        StringBuilder sb = new StringBuilder(Math.min(noBreaks.length(), MAX_USER_AGENT));
+        for (int i = 0; i < noBreaks.length() && i < MAX_USER_AGENT; i++) {
+            char c = noBreaks.charAt(i);
+            sb.append(Character.isISOControl(c) ? '_' : c);
+        }
+        return sb.toString();
     }
 
     static String truncate(String value, int max) {
