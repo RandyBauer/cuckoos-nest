@@ -115,3 +115,19 @@ checkstyle {
 	toolVersion = '14.4.0'
 	maxWarnings = 0
 }
+
+// Code documentation: `./gradlew javadoc` writes build/docs/javadoc. Doclint checks that every
+// comment is well-formed (valid HTML, {@link}s that resolve, @param names that exist) and the
+// build fails on any problem. It doesn't demand a comment on every member ("-missing"): only
+// classes and non-obvious methods are documented. CI publishes the result to GitHub Pages.
+tasks.named('javadoc', Javadoc) {
+	options.encoding = 'UTF-8'
+	options.addBooleanOption('Xdoclint:all,-missing', true)
+	options.addBooleanOption('Werror', true)
+	options.windowTitle = "The Cuckoo's Nest API"
+	options.docTitle = "The Cuckoo's Nest: code documentation"
+}
+
+tasks.named('check') {
+	dependsOn 'javadoc'
+}

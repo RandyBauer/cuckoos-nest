@@ -115,6 +115,18 @@ breaks.
 | Collapse bursts | `SET NX` with a 60-second expiry per decoy and source (`nest:seen:*`) | A script hitting one decoy 500 times in a minute makes one alert, not 500. |
 | Rate limit | `INCR` per IP per minute (`nest:rate:*`), 120 by default | The tripwires must be public, so a flood is answered with `429` before it reaches the database. Every tripwire gets the same `429`, so the limit can't be used to tell traps apart. |
 
+## API and code documentation
+
+- **MCP API reference:** [docs/MCP.md](docs/MCP.md) covers every tool, parameter, response
+  shape, and error, plus a raw `curl` session. A test fails the build if a tool or parameter is
+  added without being documented there.
+- **Javadoc:** published with every push to `main` at
+  **https://randybauer.github.io/cuckoos-nest/**, together with the accessibility reports.
+  `./gradlew check` runs Javadoc's doclint, so a broken `{@link}` or malformed comment fails CI.
+- There is deliberately no OpenAPI/Swagger page. The only other HTTP endpoints are the tripwires,
+  and a public Swagger page for them would be a map of the traps
+  ([why](docs/MCP.md#why-there-is-no-openapi--swagger-page)).
+
 ## Tech stack
 
 Java 21 · Spring Boot 4.2 · Spring AI MCP server · PostgreSQL · Redis · Gradle
