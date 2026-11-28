@@ -14,6 +14,8 @@ services:
       SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER:-nest}
       SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD:-nest-dev-only}
       SPRING_DATA_REDIS_HOST: redis
+      # Bearer token for AI agents on /mcp. Dev-only default; set a real secret anywhere else.
+      NEST_MCP_TOKEN: ${NEST_MCP_TOKEN:-dev-mcp-token}
     depends_on:
       postgres:
         condition: service_healthy

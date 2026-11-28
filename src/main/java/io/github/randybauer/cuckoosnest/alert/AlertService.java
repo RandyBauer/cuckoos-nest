@@ -6,6 +6,7 @@ import java.time.Duration;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Limit;
@@ -66,6 +67,12 @@ public class AlertService {
     public List<Alert> recent(Duration window, int limit) {
         int safeLimit = Math.clamp(limit, 1, MAX_LIMIT);
         return alerts.findByTouchedAtAfterOrderByTouchedAtDesc(clock.instant().minus(window), Limit.of(safeLimit));
+    }
+
+    /** One alert with its decoy loaded. */
+    @Transactional(readOnly = true)
+    public Optional<Alert> find(long id) {
+        return alerts.findWithDecoyById(id);
     }
 
     static String truncate(String value, int max) {

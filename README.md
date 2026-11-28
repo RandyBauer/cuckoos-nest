@@ -44,6 +44,31 @@ header, or `?api_key=`) records an alert. The answer is always the same `401`. K
 looking like a real cloud key, and the checksum lets the Nest reject random strings without a
 database lookup (the same idea GitHub uses for its tokens).
 
+## Connect an AI agent (MCP)
+
+The Nest is also a [Model Context Protocol](https://modelcontextprotocol.io) server at `/mcp`
+(streamable HTTP). Agents authenticate with a bearer token from the `NEST_MCP_TOKEN` environment
+variable. With the Docker stack running, add it to Claude Code like this:
+
+```bash
+claude mcp add --transport http cuckoos-nest http://localhost:8080/mcp   --header "Authorization: Bearer dev-mcp-token"
+```
+
+The agent gets five tools:
+
+| Tool | What it does |
+|---|---|
+| `create_decoy` | Makes a URL, CREDENTIAL, or MCP_TOOL decoy and returns the bait to plant |
+| `list_decoys` | Lists decoys with their bait |
+| `list_alerts` | Lists recent touches |
+| `explain_alert` | Explains one alert in plain language and suggests what to check |
+| `retire_decoy` | Takes a decoy out of service |
+
+The third decoy type lives here too. An **MCP_TOOL decoy** is a tempting fake tool, such as
+`get_production_credentials`, listed next to the real tools. A well-behaved agent never needs it,
+so a call means the agent was misled, for example by a prompt injection. The call records an alert
+naming the agent's client, and returns a dull "permission denied".
+
 ## Tech stack
 
 Java 21 · Spring Boot 4.2 · Spring AI MCP server · PostgreSQL · Redis · Gradle

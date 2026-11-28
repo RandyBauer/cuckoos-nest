@@ -10,4 +10,6 @@ public interface DecoyRepository extends JpaRepository<Decoy, UUID> {
     Optional<Decoy> findByToken(String token);
 
     List<Decoy> findAllByOrderByCreatedAtDesc();
+
+    List<Decoy> findByTypeAndRetiredAtIsNullOrderByCreatedAt(String type);
 }
