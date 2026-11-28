@@ -1,0 +1,8 @@
+[Unit]
+Description=Back up the cuckoos-nest database
+After=docker.service network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+ExecStart=/opt/cuckoos-nest/nest-backup.sh

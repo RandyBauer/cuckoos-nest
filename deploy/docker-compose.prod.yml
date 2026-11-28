@@ -1,0 +1,43 @@
+# Production stack on the EC2 server, in /opt/cuckoos-nest. See deploy/README.md.
+#   Caddy (HTTPS on 80/443) -> app (Spring Boot, port 8080, not published) -> Postgres on Amazon RDS
+#                                                                          -> Redis (this host)
+# Secrets live in /opt/cuckoos-nest/.env (chmod 600), never in git. .env.sample lists them.
+services:
+  caddy:
+    image: caddy:2-alpine
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    environment:
+      NEST_HOST: ${NEST_HOST}
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy-data:/data
+      - caddy-config:/config
+    depends_on:
+      - app
+
+  app:
+    image: ghcr.io/randybauer/cuckoos-nest:latest
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      SPRING_PROFILES_ACTIVE: prod
+      REDIS_HOST: redis
+      REDIS_PORT: "6379"
+    # The instance has 1 GiB of RAM plus swap. Cap the JVM container so Caddy and Redis keep room.
+    mem_limit: 640m
+    depends_on:
+      - redis
+
+  redis:
+    image: redis:8-alpine
+    restart: unless-stopped
+    # Cache only: every key expires, so nothing needs to survive a restart.
+    command: ["redis-server", "--save", "", "--appendonly", "no", "--maxmemory", "48mb", "--maxmemory-policy", "volatile-ttl"]
+    mem_limit: 96m
+
+volumes:
+  caddy-data:
+  caddy-config:

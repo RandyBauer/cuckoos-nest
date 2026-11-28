@@ -1,0 +1,8 @@
+[Unit]
+Description=Deploy a new cuckoos-nest image if CI published one
+After=docker.service network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+ExecStart=/opt/cuckoos-nest/nest-update.sh

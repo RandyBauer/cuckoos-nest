@@ -1,0 +1,9 @@
+[Unit]
+Description=Back up the cuckoos-nest database every night
+
+[Timer]
+OnCalendar=*-*-* 09:30:00 UTC
+Persistent=true
+
+[Install]
+WantedBy=timers.target
