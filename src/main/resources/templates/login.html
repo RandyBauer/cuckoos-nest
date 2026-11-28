@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Sign in · The Cuckoo's Nest</title>
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+    <link rel="stylesheet" th:href="@{/css/nest.css}">
+</head>
+<body class="center">
+<main class="card narrow">
+    <h1>The Cuckoo's Nest</h1>
+    <p class="muted">Honeytokens that catch whoever touches them.</p>
+
+    <p th:if="${param.error}" class="notice error" role="alert">Wrong username or password.</p>
+    <p th:if="${param.logout}" class="notice" role="status">You are signed out.</p>
+
+    <form th:action="@{/login}" method="post">
+        <label for="username">Username</label>
+        <input id="username" name="username" type="text" autocomplete="username" required autofocus>
+
+        <label for="password">Password</label>
+        <input id="password" name="password" type="password" autocomplete="current-password" required>
+
+        <button type="submit">Sign in</button>
+    </form>
+</main>
+</body>
+</html>

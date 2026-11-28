@@ -3,7 +3,6 @@ package io.github.randybauer.cuckoosnest.config;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
-import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.web.SecurityFilterChain;
 
@@ -19,7 +18,8 @@ import org.springframework.security.web.SecurityFilterChain;
  *       requests without CSRF tokens, so CSRF checks are off for those paths only.
  * </ul>
  *
- * <p>Everything else requires a login. The MCP endpoint has its own rules: see {@link McpSecurityConfig}.
+ * <p>The login page and its stylesheet are public too. Everything else requires signing in as the
+ * admin (see {@link AdminUserConfig}). The MCP endpoint has its own rules: see {@link McpSecurityConfig}.
  */
 @Configuration
 public class SecurityConfig {
@@ -33,10 +33,14 @@ public class SecurityConfig {
                         .permitAll()
                         .requestMatchers(TRIPWIRES)
                         .permitAll()
+                        .requestMatchers("/css/**", "/favicon.svg", "/error")
+                        .permitAll()
                         .anyRequest()
                         .authenticated())
                 .csrf(csrf -> csrf.ignoringRequestMatchers(TRIPWIRES))
-                .formLogin(Customizer.withDefaults());
+                .formLogin(form ->
+                        form.loginPage("/login").defaultSuccessUrl("/", true).permitAll())
+                .logout(logout -> logout.logoutSuccessUrl("/login?logout").permitAll());
         return http.build();
     }
 }
