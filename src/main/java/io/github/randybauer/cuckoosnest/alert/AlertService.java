@@ -28,10 +28,31 @@ public class AlertService {
 
     private final AlertRepository alerts;
     private final Clock clock;
+    private final RepeatFilter repeats;
 
-    public AlertService(AlertRepository alerts, Clock clock) {
+    public AlertService(AlertRepository alerts, Clock clock, RepeatFilter repeats) {
         this.alerts = alerts;
         this.clock = clock;
+        this.repeats = repeats;
+    }
+
+    /**
+     * Records a touch from a tripwire, unless the same source touched the same decoy in the last
+     * minute (see {@link RepeatFilter}). Returns the new alert, or empty for a repeat.
+     */
+    @Transactional
+    public Optional<Alert> recordTouch(
+            Decoy decoy, Alert.Channel channel, String sourceIp, String userAgent, Map<String, ?> details) {
+        String source = sourceIp != null ? sourceIp : userAgent;
+        if (!repeats.isFirst(decoy.getId(), channel, source)) {
+            LOG.info(
+                    "Repeat touch of decoy {} from {} within {}s; not recorded again.",
+                    decoy.getId(),
+                    forLog(source),
+                    RepeatFilter.WINDOW.toSeconds());
+            return Optional.empty();
+        }
+        return Optional.of(record(decoy, channel, sourceIp, userAgent, details));
     }
 
     /**
@@ -54,13 +75,13 @@ public class AlertService {
                 .addKeyValue("decoyId", decoy.getId())
                 .addKeyValue("decoyType", decoy.getType())
                 .addKeyValue("channel", channel)
-                .addKeyValue("sourceIp", alert.getSourceIp())
+                .addKeyValue("sourceIp", forLog(alert.getSourceIp()))
                 .log(
                         "Decoy touched: \"{}\" ({}) via {} from {}",
-                        decoy.getLabel(),
+                        forLog(decoy.getLabel()),
                         decoy.getType(),
                         channel,
-                        alert.getSourceIp());
+                        forLog(alert.getSourceIp()));
         return alert;
     }
 
@@ -83,6 +104,24 @@ public class AlertService {
     @Transactional(readOnly = true)
     public Optional<Alert> find(long id) {
         return alerts.findWithDecoyById(id);
+    }
+
+    /**
+     * Makes a stranger-supplied value safe to put in a log line. A user agent such as
+     * {@code "curl\r\n2026-12-01 ERROR fake entry"} would otherwise forge a second line in plain-text
+     * logs (log injection). Line breaks and other control characters become '_'.
+     */
+    static String forLog(String value) {
+        if (value == null) {
+            return null;
+        }
+        String noBreaks = value.replace('\r', '_').replace('\n', '_');
+        StringBuilder sb = new StringBuilder(Math.min(noBreaks.length(), MAX_USER_AGENT));
+        for (int i = 0; i < noBreaks.length() && i < MAX_USER_AGENT; i++) {
+            char c = noBreaks.charAt(i);
+            sb.append(Character.isISOControl(c) ? '_' : c);
+        }
+        return sb.toString();
     }
 
     static String truncate(String value, int max) {

@@ -36,7 +36,7 @@ public class UrlTripController {
     @RequestMapping(UrlDecoyType.PATH_PREFIX + "{token}")
     public ResponseEntity<String> touch(@PathVariable String token, HttpServletRequest request) {
         decoys.findActive(UrlDecoyType.ID, token)
-                .ifPresent(decoy -> alerts.record(
+                .ifPresent(decoy -> alerts.recordTouch(
                         decoy,
                         Alert.Channel.HTTP,
                         request.getRemoteAddr(),

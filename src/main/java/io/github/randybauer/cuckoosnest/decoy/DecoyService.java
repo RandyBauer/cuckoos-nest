@@ -22,18 +22,21 @@ public class DecoyService {
     private final TokenGenerator tokens;
     private final Clock clock;
     private final ApplicationEventPublisher events;
+    private final MissCache misses;
 
     public DecoyService(
             DecoyRepository decoys,
             DecoyTypeRegistry types,
             TokenGenerator tokens,
             Clock clock,
-            ApplicationEventPublisher events) {
+            ApplicationEventPublisher events,
+            MissCache misses) {
         this.decoys = decoys;
         this.types = types;
         this.tokens = tokens;
         this.clock = clock;
         this.events = events;
+        this.misses = misses;
     }
 
     /**
@@ -48,6 +51,7 @@ public class DecoyService {
         String cleanLabel = requireText(label, "label", MAX_LABEL);
         String cleanLocation = optionalText(location, "location", MAX_LOCATION);
         Decoy decoy = decoys.save(new Decoy(type.id(), uniqueToken(type), cleanLabel, cleanLocation, clock.instant()));
+        misses.forget(decoy.getType(), decoy.getToken());
         events.publishEvent(new DecoyEvent.Created(decoy));
         return decoy;
     }
@@ -82,7 +86,16 @@ public class DecoyService {
     /** Finds an active decoy of the given type by its secret token. */
     @Transactional(readOnly = true)
     public Optional<Decoy> findActive(String typeId, String token) {
-        return decoys.findByToken(token).filter(d -> d.getType().equals(typeId)).filter(Decoy::isActive);
+        if (token == null || misses.isKnownMiss(typeId, token)) {
+            return Optional.empty();
+        }
+        Optional<Decoy> found = decoys.findByToken(token)
+                .filter(d -> d.getType().equals(typeId))
+                .filter(Decoy::isActive);
+        if (found.isEmpty()) {
+            misses.rememberMiss(typeId, token);
+        }
+        return found;
     }
 
     /** Tokens are random enough that a clash is practically impossible, but check anyway. */
