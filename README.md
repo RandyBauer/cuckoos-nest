@@ -58,6 +58,20 @@ Open the folder in VS Code and run **Dev Containers: Reopen in Container**. The
 Testcontainers, with Postgres and Redis running beside it. Ports 8080, 5432, and 6379 are
 forwarded, and the first build is warmed up by `postCreateCommand`.
 
+## Databases
+
+PostgreSQL holds the decoys and alerts. [Flyway](src/main/resources/db/migration) owns the schema,
+and Hibernate only validates that the entities match it. Each environment has its own database:
+
+| Environment | Database | How it starts | Sample data |
+|---|---|---|---|
+| Development | Postgres from `docker-compose.yml` | `docker compose up` (profile `dev`) | Yes: one decoy of each type |
+| Tests | A throwaway Postgres per test run | Testcontainers, automatically | No |
+| Production | Its own Postgres | Profile `prod`; `DATABASE_URL`, `DATABASE_USERNAME`, `DATABASE_PASSWORD` | Never |
+
+To change the schema, add a new versioned file (`V2__...sql`). Never edit a migration that has
+already run.
+
 ## Code quality
 
 `./gradlew build` also runs the code-quality checks, and fails if either one finds a problem:
