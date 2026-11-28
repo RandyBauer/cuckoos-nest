@@ -14,6 +14,20 @@ records every touch.
 
 > **Status:** under construction. See the [v1.0 milestone](https://github.com/RandyBauer/cuckoos-nest/milestone/1).
 
+## How it works
+
+Each **decoy type** is a plugin: one class that implements
+[`DecoyType`](src/main/java/io/github/randybauer/cuckoosnest/decoy/DecoyType.java). The app finds
+every plugin at startup, so adding a new kind of decoy doesn't change any other code.
+
+The first plugin is the **URL decoy**. It is a link like `https://<nest>/t/<random token>` that
+you plant in docs or code comments with a tempting label, such as "internal admin dashboard".
+Any request to it, with any HTTP method, records an alert with the time, source IP, user agent,
+and request details.
+
+The tripwire always answers with the same plain `404 Not Found`, whether the token is a live
+decoy, a retired one, or random text. A visitor can't tell which links are traps.
+
 ## Tech stack
 
 Java 21 · Spring Boot 4.2 · Spring AI MCP server · PostgreSQL · Redis · Gradle
