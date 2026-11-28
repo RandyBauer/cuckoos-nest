@@ -5,6 +5,7 @@ plugins {
 	id 'checkstyle'
 	id 'jacoco'
 	id 'com.diffplug.spotless' version '8.12.0'
+	id 'info.solidsoft.pitest' version '1.19.0'
 }
 
 group = 'io.github.randybauer'
@@ -114,4 +115,35 @@ spotless {
 checkstyle {
 	toolVersion = '14.4.0'
 	maxWarnings = 0
+}
+
+// Mutation testing: `./gradlew pitest` makes small bugs ("mutants") in the code, such as flipping
+// a < to <=, and checks that some test fails for each one. A mutant that survives points at a
+// test that runs the code without really checking it. Scoped to the pure logic and its fast unit
+// tests, because PIT reruns the tests once per mutant. Report: build/reports/pitest/index.html.
+pitest {
+	pitestVersion = '1.30.2'
+	junit5PluginVersion = '1.2.3'
+	targetClasses = [
+		'io.github.randybauer.cuckoosnest.decoy.Decoy',
+		'io.github.randybauer.cuckoosnest.decoy.Base62',
+		'io.github.randybauer.cuckoosnest.decoy.TokenGenerator',
+		'io.github.randybauer.cuckoosnest.decoy.DecoyTypeRegistry',
+		'io.github.randybauer.cuckoosnest.decoy.types.*',
+		'io.github.randybauer.cuckoosnest.config.AdminUserConfig',
+	]
+	targetTests = [
+		'io.github.randybauer.cuckoosnest.decoy.*Tests',
+		'io.github.randybauer.cuckoosnest.config.AdminUserConfigTests',
+	]
+	excludedTestClasses = [
+		'io.github.randybauer.cuckoosnest.decoy.DecoyServiceTests',
+		'io.github.randybauer.cuckoosnest.decoy.PersistenceTests',
+		'io.github.randybauer.cuckoosnest.decoy.DevSeedDataTests',
+		'io.github.randybauer.cuckoosnest.decoy.MissCacheTests',
+	]
+	threads = 4
+	outputFormats = ['HTML', 'XML']
+	timestampedReports = false
+	mutationThreshold = 90
 }
