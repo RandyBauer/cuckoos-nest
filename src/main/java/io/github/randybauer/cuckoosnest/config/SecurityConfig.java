@@ -9,12 +9,13 @@ import org.springframework.security.web.SecurityFilterChain;
 /**
  * Web security rules.
  *
- * <p>Two things are public on purpose:
+ * <p>These are public on purpose:
  *
  * <ul>
  *   <li>the health check, so load balancers and uptime monitors can reach it;
- *   <li>the decoy tripwires under {@code /t/}, because strangers touching them is the whole point.
- *       Scripts often send POSTs without a CSRF token, so CSRF checks are off for that path only.
+ *   <li>the decoy tripwires: URL decoys under {@code /t/} and the decoy API under {@code /api/v1/}
+ *       that fake keys are used against. Strangers touching them is the whole point. Scripts send
+ *       requests without CSRF tokens, so CSRF checks are off for those paths only.
  * </ul>
  *
  * <p>Everything else requires a login.
@@ -22,11 +23,13 @@ import org.springframework.security.web.SecurityFilterChain;
 @Configuration
 public class SecurityConfig {
 
-    static final String TRIPWIRES = "/t/**";
+    static final String[] TRIPWIRES = {"/t/**", "/api/v1/**"};
 
     @Bean
     SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        http.authorizeHttpRequests(auth -> auth.requestMatchers("/actuator/health", "/actuator/health/**", TRIPWIRES)
+        http.authorizeHttpRequests(auth -> auth.requestMatchers("/actuator/health", "/actuator/health/**")
+                        .permitAll()
+                        .requestMatchers(TRIPWIRES)
                         .permitAll()
                         .anyRequest()
                         .authenticated())
