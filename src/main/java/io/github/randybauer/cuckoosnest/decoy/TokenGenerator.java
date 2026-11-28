@@ -25,6 +25,11 @@ public class TokenGenerator {
         this.random = random;
     }
 
+    /** Returns a random index from 0 (inclusive) to {@code bound} (exclusive). */
+    public int nextIndex(int bound) {
+        return random.nextInt(bound);
+    }
+
     /** Returns {@code length} random base62 characters. */
     public String base62(int length) {
         if (length < 1) {
