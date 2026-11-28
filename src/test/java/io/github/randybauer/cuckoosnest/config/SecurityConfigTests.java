@@ -18,33 +18,28 @@ import org.springframework.test.web.servlet.MockMvc;
 @AutoConfigureMockMvc
 class SecurityConfigTests {
 
-	@Autowired
-	private MockMvc mvc;
+    @Autowired
+    private MockMvc mvc;
 
-	@Test
-	void healthIsPublicAndUp() throws Exception {
-		mvc.perform(get("/actuator/health"))
-			.andExpect(status().isOk())
-			.andExpect(jsonPath("$.status").value("UP"));
-	}
+    @Test
+    void healthIsPublicAndUp() throws Exception {
+        mvc.perform(get("/actuator/health"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.status").value("UP"));
+    }
 
-	@Test
-	void healthDoesNotLeakComponentDetails() throws Exception {
-		mvc.perform(get("/actuator/health"))
-			.andExpect(jsonPath("$.components").doesNotExist());
-	}
+    @Test
+    void healthDoesNotLeakComponentDetails() throws Exception {
+        mvc.perform(get("/actuator/health")).andExpect(jsonPath("$.components").doesNotExist());
+    }
 
-	@Test
-	void everythingElseRedirectsToLogin() throws Exception {
-		mvc.perform(get("/"))
-			.andExpect(status().is3xxRedirection())
-			.andExpect(redirectedUrl("/login"));
-	}
+    @Test
+    void everythingElseRedirectsToLogin() throws Exception {
+        mvc.perform(get("/")).andExpect(status().is3xxRedirection()).andExpect(redirectedUrl("/login"));
+    }
 
-	@Test
-	void otherActuatorEndpointsAreNotPublic() throws Exception {
-		mvc.perform(get("/actuator/env"))
-			.andExpect(status().is3xxRedirection());
-	}
-
+    @Test
+    void otherActuatorEndpointsAreNotPublic() throws Exception {
+        mvc.perform(get("/actuator/env")).andExpect(status().is3xxRedirection());
+    }
 }

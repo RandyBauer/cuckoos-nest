@@ -2,10 +2,14 @@ package io.github.randybauer.cuckoosnest;
 
 import org.springframework.boot.SpringApplication;
 
-public class TestCuckoosNestApplication {
+/** Starts the app locally with throwaway Postgres and Redis containers ({@code ./gradlew bootTestRun}). */
+public final class TestCuckoosNestApplication {
 
-	public static void main(String[] args) {
-		SpringApplication.from(CuckoosNestApplication::main).with(TestcontainersConfiguration.class).run(args);
-	}
+    private TestCuckoosNestApplication() {}
 
+    public static void main(String[] args) {
+        SpringApplication.from(CuckoosNestApplication::main)
+                .with(TestcontainersConfiguration.class)
+                .run(args);
+    }
 }
