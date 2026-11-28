@@ -8,6 +8,8 @@ services:
     ports:
       - "8080:8080"
     environment:
+      # "dev" adds the sample decoys; the variables below override its localhost settings.
+      SPRING_PROFILES_ACTIVE: dev
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/${POSTGRES_DB:-nest}
       SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER:-nest}
       SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD:-nest-dev-only}
