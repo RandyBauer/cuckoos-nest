@@ -4,6 +4,7 @@ import java.time.Clock;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -13,18 +14,26 @@ public class DecoyService {
 
     static final int MAX_LABEL = 200;
     static final int MAX_LOCATION = 500;
-    private static final int TOKEN_ATTEMPTS = 5;
+    // Random tokens never clash in practice; MCP tool names come from a small set, so allow retries.
+    private static final int TOKEN_ATTEMPTS = 20;
 
     private final DecoyRepository decoys;
     private final DecoyTypeRegistry types;
     private final TokenGenerator tokens;
     private final Clock clock;
+    private final ApplicationEventPublisher events;
 
-    public DecoyService(DecoyRepository decoys, DecoyTypeRegistry types, TokenGenerator tokens, Clock clock) {
+    public DecoyService(
+            DecoyRepository decoys,
+            DecoyTypeRegistry types,
+            TokenGenerator tokens,
+            Clock clock,
+            ApplicationEventPublisher events) {
         this.decoys = decoys;
         this.types = types;
         this.tokens = tokens;
         this.clock = clock;
+        this.events = events;
     }
 
     /**
@@ -38,7 +47,9 @@ public class DecoyService {
         DecoyType type = types.get(typeId);
         String cleanLabel = requireText(label, "label", MAX_LABEL);
         String cleanLocation = optionalText(location, "location", MAX_LOCATION);
-        return decoys.save(new Decoy(type.id(), uniqueToken(type), cleanLabel, cleanLocation, clock.instant()));
+        Decoy decoy = decoys.save(new Decoy(type.id(), uniqueToken(type), cleanLabel, cleanLocation, clock.instant()));
+        events.publishEvent(new DecoyEvent.Created(decoy));
+        return decoy;
     }
 
     @Transactional(readOnly = true)
@@ -50,11 +61,25 @@ public class DecoyService {
     @Transactional
     public Decoy retire(UUID id) {
         Decoy decoy = decoys.findById(id).orElseThrow(() -> new DecoyNotFoundException(id));
-        decoy.retire(clock.instant());
+        if (decoy.isActive()) {
+            decoy.retire(clock.instant());
+            events.publishEvent(new DecoyEvent.Retired(decoy));
+        }
         return decoy;
     }
 
     /** Finds an active decoy of the given type by its secret token. */
+    /** All active decoys of one type, oldest first. */
+    @Transactional(readOnly = true)
+    public List<Decoy> activeOfType(String typeId) {
+        return decoys.findByTypeAndRetiredAtIsNullOrderByCreatedAt(typeId);
+    }
+
+    @Transactional(readOnly = true)
+    public Optional<Decoy> find(UUID id) {
+        return decoys.findById(id);
+    }
+
     @Transactional(readOnly = true)
     public Optional<Decoy> findActive(String typeId, String token) {
         return decoys.findByToken(token).filter(d -> d.getType().equals(typeId)).filter(Decoy::isActive);
