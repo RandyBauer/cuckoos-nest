@@ -8,13 +8,15 @@ cd /opt/cuckoos-nest
 dir=/var/backups/nest
 mkdir -p "$dir"
 file="$dir/nest-$(date -u +%Y%m%d-%H%M%S).sql.gz"
-# DATABASE_URL is jdbc:postgresql://HOST:PORT/DB; pg_dump wants HOST, PORT, and DB separately.
+# DATABASE_URL is jdbc:postgresql://HOST:PORT/DB?options; pg_dump wants HOST, PORT, and DB.
 hostportdb=${DATABASE_URL#jdbc:postgresql://}
+hostportdb=${hostportdb%%\?*}
 host=${hostportdb%%:*}
 portdb=${hostportdb#*:}
 port=${portdb%%/*}
 db=${portdb#*/}
-docker run --rm -e PGPASSWORD="$DATABASE_PASSWORD" postgres:18-alpine \
+# RDS requires TLS; the client image matches the server's major version (PostgreSQL 18).
+docker run --rm -e PGPASSWORD="$DATABASE_PASSWORD" -e PGSSLMODE=require postgres:18-alpine \
     pg_dump --host "$host" --port "$port" --username "$DATABASE_USERNAME" --dbname "$db" \
     --no-owner --no-privileges | gzip > "$file.tmp"
 mv "$file.tmp" "$file"

@@ -14,7 +14,8 @@ The Nest plants decoys where people and coding agents wander — docs, config fi
 list an agent sees over the [Model Context Protocol](https://modelcontextprotocol.io) — and
 records every touch.
 
-> **Status:** under construction. See the [v1.0 milestone](https://github.com/RandyBauer/cuckoos-nest/milestone/1).
+> **Live:** https://54-186-140-252.sslip.io (AWS EC2 + RDS, deployed automatically from `main`).
+> Roadmap: the [v1.0 milestone](https://github.com/RandyBauer/cuckoos-nest/milestone/1).
 
 ## How it works
 
@@ -185,6 +186,15 @@ so a log service can search by field. A decoy touch logs at `WARN` with its fact
  "event":"decoy.touched","decoyId":"11111111-...","decoyType":"URL","channel":"HTTP",
  "sourceIp":"172.21.0.1","service":{"name":"cuckoos-nest"},"ecs":{"version":"8.11"}}
 ```
+
+## Deployment
+
+Production runs on AWS: one EC2 instance behind Caddy (automatic HTTPS from Let's Encrypt), with
+PostgreSQL on Amazon RDS. **Continuous deployment:** after every green build on `main`, CI
+publishes a Docker image to GitHub's container registry, and the server pulls and runs it within
+two minutes. The server pulls; GitHub never pushes into it, so no deploy keys live in GitHub.
+**Backups:** RDS automated snapshots plus a nightly SQL dump with a scripted restore test.
+Details: [deploy/README.md](deploy/README.md).
 
 ## Code quality
 

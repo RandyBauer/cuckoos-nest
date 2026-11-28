@@ -30,6 +30,10 @@ updates:
     schedule:
       interval: weekly
       day: monday
+    ignore:
+      # Stay on the Java 21 LTS that the Gradle toolchain targets; take only 21.x updates here.
+      - dependency-name: eclipse-temurin
+        update-types: ["version-update:semver-major"]
 
   - package-ecosystem: devcontainers
     directory: /
