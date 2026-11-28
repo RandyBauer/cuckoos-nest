@@ -30,6 +30,20 @@ and request details.
 The tripwire always answers with the same plain `404 Not Found`, whether the token is a live
 decoy, a retired one, or random text. A visitor can't tell which links are traps.
 
+The second plugin is the **credential decoy**: a fake API key you plant in a config file, next to
+the address of the Nest's decoy API:
+
+```
+API_BASE_URL=https://<nest>/api/v1
+API_KEY=nest_k3Q9...
+```
+
+Any request under `/api/v1/` that sends the key (as `Authorization: Bearer`, an `X-API-Key`
+header, or `?api_key=`) records an alert. The answer is always the same `401`. Keys look like
+`nest_` + 30 random characters + a 6-character CRC32 checksum. The prefix keeps them from ever
+looking like a real cloud key, and the checksum lets the Nest reject random strings without a
+database lookup (the same idea GitHub uses for its tokens).
+
 ## Tech stack
 
 Java 21 · Spring Boot 4.2 · Spring AI MCP server · PostgreSQL · Redis · Gradle
