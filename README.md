@@ -94,6 +94,17 @@ already run.
 - **Checkstyle** checks naming and common mistakes. The rules are in
   [`config/checkstyle/checkstyle.xml`](config/checkstyle/checkstyle.xml).
 
+## Security checks
+
+- **CodeQL** ([workflow](.github/workflows/codeql.yml)) scans the Java code for security bugs on
+  every pull request, every push to `main`, and weekly. Findings show under *Security → Code
+  scanning*.
+- **Secret scanning** with push protection is on, so a pushed credential is caught, and most are
+  blocked before they land.
+- **Dependabot** alerts on known-vulnerable dependencies, opens security fixes, and
+  ([config](.github/dependabot.yml)) opens grouped weekly update PRs for Gradle, GitHub Actions,
+  Docker base images, and the Dev Container.
+
 ## Contributing
 
 [CI](.github/workflows/ci.yml) runs `./gradlew build` on every push to `main` and on every pull
