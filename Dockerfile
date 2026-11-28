@@ -1,7 +1,7 @@
 # syntax=docker/dockerfile:1
 
 # ---- Build stage: compile the app and unpack the jar into layers ----
-FROM eclipse-temurin:21-jdk-noble AS build
+FROM eclipse-temurin:25-jdk-noble AS build
 WORKDIR /src
 
 # Download Gradle and dependencies first, so this layer is cached until the build files change.
@@ -16,7 +16,7 @@ RUN ./gradlew --no-daemon bootJar -x test \
  && java -Djarmode=tools -jar build/libs/cuckoos-nest-*.jar extract --layers --launcher --destination /layers
 
 # ---- Runtime stage: a small JRE image that runs as a non-root user ----
-FROM eclipse-temurin:21-jre-alpine
+FROM eclipse-temurin:25-jre-alpine
 RUN addgroup -S nest && adduser -S nest -G nest
 WORKDIR /app
 
